@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  Env:
+    Type: String
+    Default: "dev"
+
+  RawBucketName:
+    Type: String
+    Default: "efw-datalake-raw"
+
+  TrustedBucketName:
+    Type: String
+    Default: "efw-datalake-trusted"
+
+  ClientBucketName:
+    Type: String
+    Default: "efw-datalake-client"
+
+Resources:
+  EcoFireWatchRaw:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref RawBucketName
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Ref RawBucketName
+        - Key: Environment
+          Value: !Ref Env
+
+  EcoFireWatchTrusted:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref TrustedBucketName
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Ref TrustedBucketName
+        - Key: Environment
+          Value: !Ref Env
+
+  EcoFireWatchClient:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ClientBucketName
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Ref ClientBucketName
+        - Key: Environment
+          Value: !Ref Env

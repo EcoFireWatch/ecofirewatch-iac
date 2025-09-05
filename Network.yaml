@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: EcoFireWatch Network Infrastructure
+
+Resources:
+  EfwVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: EfwVPC
+
+  EfwInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: EfwIGW
+
+  EfwVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref EfwVPC
+      InternetGatewayId: !Ref EfwInternetGateway
+
+  EfwPublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref EfwVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: EfwPublicSubnetA
+
+  EfwPublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref EfwVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: EfwPublicSubnetB
+
+  EfwPrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref EfwVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: EfwPrivateSubnetA
+
+  EfwPrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref EfwVPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: EfwPrivateSubnetB
+
+  EfwPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref EfwVPC
+      Tags:
+        - Key: Name
+          Value: EfwPublicRouteTable
+
+  EfwPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref EfwPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref EfwInternetGateway
+
+  EfwPublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EfwPublicSubnetA
+      RouteTableId: !Ref EfwPublicRouteTable
+
+  EfwPublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EfwPublicSubnetB
+      RouteTableId: !Ref EfwPublicRouteTable
+
+  EfwPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref EfwVPC
+      Tags:
+        - Key: Name
+          Value: EfwPrivateRouteTable
+
+  EfwPrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EfwPrivateSubnetA
+      RouteTableId: !Ref EfwPrivateRouteTable
+
+  EfwPrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EfwPrivateSubnetB
+      RouteTableId: !Ref EfwPrivateRouteTable
