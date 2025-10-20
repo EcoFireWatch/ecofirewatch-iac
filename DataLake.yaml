@@ -7,15 +7,23 @@ Parameters:
 
   RawBucketName:
     Type: String
-    Default: "efw-datalake-raw"
+    Default: "eco-fire-watch-test-raw"
 
   TrustedBucketName:
     Type: String
-    Default: "efw-datalake-trusted"
+    Default: "eco-fire-watch-test-trusted"
 
-  ClientBucketName:
+  ClientBaseName:
     Type: String
-    Default: "efw-datalake-client"
+    Default: "eco-fire-watch-client"
+
+  ClientUser:
+    Type: String
+    Default: efwUserDatabase
+
+  ClientPassword:
+    Type: String
+    Default: grupoEfw2025
 
 Resources:
   EcoFireWatchRaw:
@@ -42,14 +50,33 @@ Resources:
         - Key: Environment
           Value: !Ref Env
 
-  EcoFireWatchClient:
-    Type: AWS::S3::Bucket
+
+  EcoFireWatchClientSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
     Properties:
-      BucketName: !Ref ClientBucketName
-      VersioningConfiguration:
-        Status: Enabled
-      Tags:
-        - Key: Name
-          Value: !Ref ClientBucketName
-        - Key: Environment
-          Value: !Ref Env
+      DBSubnetGroupName: EcoFireWatchClientSubnetGroup
+      DBSubnetGroupDescription: Database SubnetGroups
+      SubnetIds:
+        - subnet-0c9afb7c95d903666
+        - subnet-0e0714d3c7ac393b1
+
+  EcoFireWatchClient:
+    Type: AWS::RDS::DBInstance
+    DependsOn:
+      - EcoFireWatchClientSubnetGroup
+    Properties:
+      DBInstanceIdentifier: !Ref ClientBaseName  
+      AllocatedStorage: 5
+      DBInstanceClass: 'db.t3.micro'
+      Engine: postgres
+      EngineVersion: '17.6'
+      MasterUsername: !Ref ClientUser
+      MasterUserPassword: !Ref ClientPassword
+      DBSubnetGroupName: !Ref EcoFireWatchClientSubnetGroup
+      VPCSecurityGroups:
+        - sg-04ce03d5e95d4c4e0
+      PubliclyAccessible: false
+      MultiAZ: false
+      StorageType: gp2
+
+# aws cloudformation deploy --template-file DataLake.yaml --stack-name eco-fire-watch-datalake

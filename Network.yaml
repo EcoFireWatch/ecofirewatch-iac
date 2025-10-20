@@ -1,11 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: EcoFireWatch Network Infrastructure
 
+Parameters:
+  CidrIpVpc:
+    Type: String
+    Default: '10.0.0.0/24'
+
 Resources:
   EfwVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.0.0.0/16
+      CidrBlock: !Ref CidrIpVpc
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
@@ -29,7 +34,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref EfwVPC
-      CidrBlock: 10.0.1.0/24
+      CidrBlock: 10.0.0.0/26
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: true
       Tags:
@@ -40,7 +45,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref EfwVPC
-      CidrBlock: 10.0.2.0/24
+      CidrBlock: 10.0.0.64/26
       AvailabilityZone: !Select [1, !GetAZs '']
       MapPublicIpOnLaunch: true
       Tags:
@@ -51,7 +56,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref EfwVPC
-      CidrBlock: 10.0.3.0/24
+      CidrBlock: 10.0.0.128/26
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
@@ -62,7 +67,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref EfwVPC
-      CidrBlock: 10.0.4.0/24
+      CidrBlock: 10.0.0.192/26
       AvailabilityZone: !Select [1, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
@@ -115,3 +120,22 @@ Resources:
     Properties:
       SubnetId: !Ref EfwPrivateSubnetB
       RouteTableId: !Ref EfwPrivateRouteTable
+
+  EcoFireWatchRDSClientSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref EfwVPC
+      GroupDescription: SecurityGroup para RDS
+      GroupName: EcoFireWatchRDSClientSecurityGroup
+      SecurityGroupEgress: 
+        - CidrIp: 0.0.0.0/0
+          FromPort: 5432
+          ToPort: 5432
+          IpProtocol: 'TCP'
+      SecurityGroupIngress: 
+        - CidrIp: !Ref CidrIpVpc
+          FromPort: 5432
+          ToPort: 5432
+          IpProtocol: 'TCP'
+
+# aws cloudformation deploy --template-file Network.yaml --stack-name eco-fire-watch-network
