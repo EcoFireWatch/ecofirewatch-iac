@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  ExternalDataTrigger:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: external-data-trigger
+      Description: "Lambda function to process external data ingestion"
+      Handler: bundle.handler
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      Runtime: nodejs22.x
+      Timeout: 300
+      MemorySize: 512
+      Code:
+        S3Bucket: eco-fire-watch-raw-v2
+        S3Key: resources/external-data-trigger.zip
+      Environment:
+        Variables:
+          RAW_BUCKET_NAME: eco-fire-watch-raw-v2
+
+  IotTransactionTrigger:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: iot-transaction-trigger
+      Description: "Lambda function to process IoT transactions"
+      Handler: bundle.handler
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      Runtime: nodejs22.x
+      Timeout: 300
+      MemorySize: 512
+      Code:
+        S3Bucket: eco-fire-watch-raw-v2
+        S3Key: resources/iot-transaction-trigger.zip
+      Environment:
+        Variables:
+          REDIS_KEY: iot-internal-queue
+          # Replace in AWS console with actual Redis URL
+          REDIS_URL: TODO 
+          REDIS_TIME_LIMIT: 600
+          REDIS_MAX_QUEUE_SIZE: 10
+          S3_BUCKET_NAME: eco-fire-watch-raw-v2
+          S3_REGION: us-east-1
