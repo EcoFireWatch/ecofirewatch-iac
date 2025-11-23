@@ -38,8 +38,12 @@ Resources:
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: true
       Tags:
+        - Key: Project
+          Value: EcoFireWatch
         - Key: Name
           Value: EfwPublicSubnetA
+        - Key: Access
+          Value: Public
 
   EfwPublicSubnetB:
     Type: AWS::EC2::Subnet
@@ -49,8 +53,12 @@ Resources:
       AvailabilityZone: !Select [1, !GetAZs '']
       MapPublicIpOnLaunch: true
       Tags:
+        - Key: Project
+          Value: EcoFireWatch
         - Key: Name
           Value: EfwPublicSubnetB
+        - Key: Access
+          Value: Public
 
   EfwPrivateSubnetA:
     Type: AWS::EC2::Subnet
@@ -60,8 +68,12 @@ Resources:
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
+        - Key: Project
+          Value: EcoFireWatch
         - Key: Name
           Value: EfwPrivateSubnetA
+        - Key: Access
+          Value: Private
 
   EfwPrivateSubnetB:
     Type: AWS::EC2::Subnet
@@ -71,8 +83,12 @@ Resources:
       AvailabilityZone: !Select [1, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
+        - Key: Project
+          Value: EcoFireWatch
         - Key: Name
           Value: EfwPrivateSubnetB
+        - Key: Access
+          Value: Private
 
   EfwPublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -126,7 +142,7 @@ Resources:
     Properties:
       VpcId: !Ref EfwVPC
       GroupDescription: SecurityGroup para RDS
-      GroupName: EcoFireWatchRDSClientSecurityGroup
+      GroupName: EcoFireWatchRDSSecGroup
       SecurityGroupEgress: 
         - CidrIp: 0.0.0.0/0
           FromPort: 5432
@@ -137,5 +153,37 @@ Resources:
           FromPort: 5432
           ToPort: 5432
           IpProtocol: 'TCP'
+      Tags:
+        - Key: Project
+          Value: EcoFireWatch
+        - Key: Name
+          Value: EcoFireWatchRDSSecGroup
+
+  EcoFireWatchGrafanaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref EfwVPC
+      GroupDescription: SecurityGroup para Grafana
+      GroupName: EcoFireWatchGrafanaSecGroup
+      SecurityGroupEgress: 
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: 'TCP'
+      SecurityGroupIngress: 
+        - CidrIp: 0.0.0.0/0
+          FromPort: 3000
+          ToPort: 3000
+          IpProtocol: 'TCP'
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: 'TCP'
+      Tags:
+        - Key: Project
+          Value: EcoFireWatch
+        - Key: Name
+          Value: EcoFireWatchGrafanaSecGroup
+          
 
 # aws cloudformation deploy --template-file Network.yaml --stack-name eco-fire-watch-network

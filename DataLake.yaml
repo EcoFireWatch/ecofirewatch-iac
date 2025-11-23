@@ -29,6 +29,12 @@ Parameters:
     Type: String
     Default: grupoEfw2025
 
+  ClientSubnetList:
+    Type: CommaDelimitedList
+
+  ClientSecurityGroupId:
+    Type: String
+
 Resources:
   EcoFireWatchRaw:
     Type: AWS::S3::Bucket
@@ -60,9 +66,7 @@ Resources:
     Properties:
       DBSubnetGroupName: EcoFireWatchClientSubnetGroup
       DBSubnetGroupDescription: Database SubnetGroups
-      SubnetIds:
-        - subnet-02b4ccc0091b49659
-        - subnet-066f229cd3694f37c
+      SubnetIds: !Ref ClientSubnetList
 
   EcoFireWatchClient:
     Type: AWS::RDS::DBInstance
@@ -79,7 +83,7 @@ Resources:
       DBSubnetGroupName: !Ref EcoFireWatchClientSubnetGroup
       DBName: !Ref ClientDatabaseName
       VPCSecurityGroups:
-        - sg-05adf7622ff81ce36
+        - !Ref ClientSecurityGroupId
       PubliclyAccessible: false
       MultiAZ: false
       StorageType: gp2

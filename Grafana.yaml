@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Grafana Setup for EcoFireWatch
+
+Parameters:
+  SubnetId:
+    Type: String
+
+  GrafanaSecurityGroup:
+    Type: CommaDelimitedList
+
+  GrafanaKey:
+    Type: String
+
+Resources:
+  GrafanaKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: grafana-key-pair
+      PublicKeyMaterial: !Ref GrafanaKey
+
+  GrafanaServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref GrafanaKeyPair
+      ImageId: !Sub ami-0c398cb65a93047f2
+      InstanceType: t3.small
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds: !Ref GrafanaSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo apt-get update -y
+          sudo apt-get upgrade -y
+
+          sudo mkdir -p /etc/apt/keyrings/
+          wget -q -O- https://packages.grafana.com/gpg.key \
+            | sudo gpg --dearmor -o /etc/apt/keyrings/grafana.gpg
+
+          echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://packages.grafana.com/oss/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/grafana.list
+
+          sudo apt-get update -y
+          sudo apt-get install grafana -y
+
+          sudo systemctl enable grafana-server
+          sudo systemctl start grafana-server
+      Tags:
+        - Key: Project
+          Value: EcoFireWatch
+        - Key: Name
+          Value: eco-fire-watch-data-analytics

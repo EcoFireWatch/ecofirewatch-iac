@@ -18,6 +18,29 @@ Resources:
         Variables:
           RAW_BUCKET_NAME: eco-fire-watch-raw-v2
 
+  DataTreatmentTrigger:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: data-treatment-trigger
+      Description: "Lambda function to process data treatment"
+      Handler: src/bundle.handler
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+      Runtime: nodejs22.x
+      Timeout: 300
+      MemorySize: 512
+      Code:
+        S3Bucket: eco-fire-watch-raw-v2
+        S3Key: resources/data-treatment-trigger.zip
+      Environment:
+        Variables:
+          RAW_NAME: eco-fire-watch-raw-v2
+          TRUSTED_NAME: eco-fire-watch-trusted-v2
+          RDS_HOST: host
+          RDS_PORT: 5432
+          RDS_DB_NAME: efwClientDatabase
+          RDS_USER: efwUserDatabase
+          RDS_PASSWORD: password
+
   IotTransactionTrigger:
     Type: AWS::Lambda::Function
     Properties:
