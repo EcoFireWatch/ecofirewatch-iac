@@ -18,6 +18,32 @@ Resources:
         Variables:
           RAW_BUCKET_NAME: eco-fire-watch-raw-v2
 
+  InpeDataSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      FlexibleTimeWindow: 
+        Mode: "OFF"
+      Name: InpeDataSchedule
+      ScheduleExpression: rate(6 hours)
+      ScheduleExpressionTimezone: America/Sao_Paulo
+      Target: 
+        Arn: !GetAtt ExternalDataTrigger.Arn
+        Input: !Sub '{ "type":"INPE" }'
+        RoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+    
+  InmetDataSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      FlexibleTimeWindow: 
+        Mode: "OFF"
+      Name: InmetDataSchedule
+      ScheduleExpression: cron(0 0 1 * ? *)
+      ScheduleExpressionTimezone: America/Sao_Paulo
+      Target: 
+        Arn: !GetAtt ExternalDataTrigger.Arn
+        Input: !Sub '{ "type":"INMET" }'
+        RoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/LabRole
+
   DataTreatmentTrigger:
     Type: AWS::Lambda::Function
     Properties:

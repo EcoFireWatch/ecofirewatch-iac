@@ -38,7 +38,7 @@ echo "Grafana Subnet ID: $grafanaSubnetId"
 keyHasCreated=$(aws ec2 describe-key-pairs --key-names grafana-key-pair --query 'KeyPairs[0].KeyName' --output text 2>/dev/null)
 echo "Grafana Key Pair: $keyHasCreated"
 if [ "$keyHasCreated" != "grafana-key-pair" ]; then
-    ssh-keygen -t rsa -b 4096 -f grafana-key.pem -N ""
+    ssh-keygen -t rsa -b 4096 -f resources/keys/grafana-key -N ""
 fi
 
 echo "================== Deploy Grafana Stack =================================="
@@ -48,4 +48,4 @@ aws cloudformation deploy \
     --parameter-overrides \
         SubnetId="$grafanaSubnetId" \
         GrafanaSecurityGroup="$grafanaSecurityGroupId" \
-        GrafanaKey="$(cat grafana-key.pub)"
+        GrafanaKey="$(cat resources/keys/grafana-key.pub)"
